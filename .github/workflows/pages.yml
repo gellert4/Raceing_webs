@@ -29,6 +29,7 @@ jobs:
         env:
           STATIC_EXPORT: '1'
           NEXT_PUBLIC_BASE_PATH: /Raceing_webs
+          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
