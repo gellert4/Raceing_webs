@@ -13,7 +13,7 @@ corepack enable
 pnpm install --frozen-lockfile
 pnpm dev
 pnpm build
-node --experimental-strip-types --test tests/cart.test.ts
+node --experimental-strip-types --test tests/*.test.ts
 ```
 
 ## Structure
@@ -29,12 +29,15 @@ node --experimental-strip-types --test tests/cart.test.ts
 One hoodie, one tee, one jet-tag keychain. Stickers are supplementary artwork, not an extra launch SKU. All renders are AI concept visuals. Textile weights, composition, sizes and final prices need production verification. Do not claim brand sponsorship.
 
 ## Launch status
-This is not a finished transactional shop. Payment, verified email lifecycle, admin uploads, REP commissions and real 360° photography are not implemented. Registration is intentionally closed until legal/controller details and consent lifecycle exist. Read the launch checklist before making the site public.
+This is not a finished transactional shop. Payment, admin uploads, REP commissions and real 360° photography are not implemented. A standalone double-opt-in email integration is implemented and tested with a mocked provider, but requires Cloudflare/Brevo setup, verified sender, completed privacy information and real delivery/unsubscribe testing. Registration is intentionally closed until legal/controller details and consent lifecycle exist. Read the launch checklist before accepting registrations or orders.
 
 ## Deployment
-For the included manual GitHub Pages workflow, follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). The static preview build has been verified locally; public hosting still needs activation.
+The public preview is at https://gellert4.github.io/Raceing_webs/. The GitHub Pages workflow builds and deploys pushes to `main`; it also supports manual runs. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-The existing private Sites deployment uses .openai/hosting.json and the bundled build adapter. This repository does not automatically deploy just because code is pushed. An independent Cloudflare deployment needs account bindings and deployment setup. Never commit .env files, credentials, database exports or customer records.
+The older Sites/Worker adapters remain in the repository but are not the public Pages deployment. Never commit credentials, database exports or customer records.
+
+## Email setup
+See [docs/EMAIL-SETUP.md](docs/EMAIL-SETUP.md). The frontend contains no provider API key. Signup stays disabled by default; configuring the provider and completing the launch gates is required before enabling it.
 
 ## Design
-Black #050505, off-white #EFEFE9, racing red #ED271C. Hoodie back graphic: DISCIPLINE / INSTINCT / FLOW. Generated concept assets are in public/. Print art requires production cleanup, color separation and supplier approval.
+Black #050505, off-white #EFEFE9, racing red #ED271C. English is the default, with Hungarian and German selectors. The reflective hoodie is a future concept in the lookbook, separate from the three launch products; see [docs/REFLECTIVE-STUDY.md](docs/REFLECTIVE-STUDY.md). Print art requires production cleanup, color separation and supplier approval.

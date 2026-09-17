@@ -256,7 +256,7 @@ export default function Home() {
     </header>
 
     <section className="hero">
-      <img src={sitePath("/flowstate-hero-v2.webp")} alt="AI campaign concept: rider wearing the Flowstate hoodie on a black supersport, carbon helmet with red vents"/>
+      <img fetchPriority="high" src={sitePath("/flowstate-hero-v2.webp")} alt="AI campaign concept: rider wearing the Flowstate hoodie on a black supersport, carbon helmet with red vents"/>
       <div className="hero-shade"/>
       <div className="hero-copy"><p className="eyebrow"><span/> {t.heroEyebrow}</p><h1>ENTER THE<br/><i>FLOWSTATE.</i></h1><p className="hero-sub">{t.heroSub}</p><div className="hero-actions"><a className="primary" href="#drop">{t.enter} <ArrowDownRight size={17}/></a><a className="text-link" href="#manifesto">{t.manifesto}</a></div></div>
       <div className="coordinate"><b>47°N</b><span>19°E / CENTRAL EUROPE</span></div>
