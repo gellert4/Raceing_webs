@@ -24,12 +24,13 @@ jobs:
           node-version: '24'
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: node --experimental-strip-types --test tests/cart.test.ts
+      - run: node --experimental-strip-types --test tests/*.test.ts
       - run: pnpm exec next build
         env:
           STATIC_EXPORT: '1'
           NEXT_PUBLIC_BASE_PATH: /Raceing_webs
-          NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
+          NEXT_PUBLIC_WAITLIST_URL: ${{ vars.WAITLIST_URL }}
+          NEXT_PUBLIC_WAITLIST_ENABLED: ${{ vars.WAITLIST_ENABLED }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

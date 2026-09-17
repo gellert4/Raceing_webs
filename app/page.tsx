@@ -1,13 +1,15 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowDownRight, Check, ChevronLeft, ChevronRight, Menu, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowDownRight, ChevronLeft, ChevronRight, Menu, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { sanitizeCart, type CartItem } from "@/lib/cart";
 import { sitePath } from "@/lib/paths";
-import { launch } from "@/lib/store-config";
+import { ui } from "@/lib/translations";
+import { useLanguage, LanguageSwitcher } from "@/components/language";
+import { SignupForm } from "@/components/signup-form";
 
-type Language = "EN" | "HU" | "DE";
+
 type Product = {
   id: number;
   code: string;
@@ -46,7 +48,7 @@ const copy = {
     manifestoIntro: "Flowstate is not a promise about speed. It is the state where distraction drops away and perception, timing and action line up. The brand is built around that feeling of complete presence.",
     manifestoQuote: "NO PAST. NO NEXT. ONLY NOW.",
     pillars: [
-      ["01", "300 KM/H", "On a closed circuit, 300 km/h is our visual metaphor for total attention. The edges blur, the line matters, and every input has consequence. Not recklessness. Presence.", "TRACK CONTEXT / TUNNEL VISION"],
+      ["01", "300 KM/H", "On a closed circuit, 300 km/h is our visual metaphor for total attention. The edges blur, the line matters, and every input has consequence. Not recklessness. Presence.", "CIRCUIT / FOCUS"],
       ["02", "47°N", "47°N marks our Central-European origin. FLOWSTATE RACING was born in Hungary, between old roads, late-night garages and a new generation building its own visual language.", "HUNGARY / CENTRAL EUROPE"],
       ["03", "FOREVER YOUNG", "Forever young is not about age. It is refusing to become numb. Stay curious. Keep creating. Collect moments strong enough to remember who you were when you felt fully alive.", "MINDSET / MEMORY"],
     ],
@@ -95,7 +97,7 @@ const copy = {
     manifestoIntro: "A flowstate nálunk nem a sebességről szóló ígéret. Az az állapot, amikor eltűnik a zavaró zaj, és az érzékelés, az időzítés meg a mozdulat egy ritmusba kerül. Erre a teljes jelenlétre épül a márka.",
     manifestoQuote: "NINCS MÚLT. NINCS KÖVETKEZŐ. CSAK MOST.",
     pillars: [
-      ["01", "300 KM/H", "Zárt pályán a 300 km/h nálunk a teljes figyelem vizuális szimbóluma. A szélek elmosódnak, az ív számít, minden mozdulatnak súlya van. Nem vakmerőség. Jelenlét.", "PÁLYA / TUNNEL VISION"],
+      ["01", "300 KM/H", "Zárt pályán a 300 km/h nálunk a teljes figyelem vizuális szimbóluma. A szélek elmosódnak, az ív számít, minden mozdulatnak súlya van. Nem vakmerőség. Jelenlét.", "PÁLYA / FÓKUSZ"],
       ["02", "47°N", "A 47°N a közép-európai eredetünket jelöli. A FLOWSTATE RACING Magyarországon született, régi utak, késő esti garázsok és egy új generáció saját vizuális nyelve között.", "MAGYARORSZÁG / KÖZÉP-EURÓPA"],
       ["03", "FOREVER YOUNG", "A forever young nem életkor. Azt jelenti, hogy nem tompulsz bele mindenbe. Maradj kíváncsi, alkoss, és gyűjts olyan pillanatokat, amelyek emlékeztetnek arra, mikor érezted magad igazán élőnek.", "SZEMLÉLET / EMLÉK"],
     ],
@@ -144,7 +146,7 @@ const copy = {
     manifestoIntro: "Flowstate ist für uns kein Versprechen über Geschwindigkeit. Es ist der Zustand, in dem Ablenkung verschwindet und Wahrnehmung, Timing und Handlung zusammenfallen. Auf diesem Gefühl vollständiger Präsenz baut die Marke auf.",
     manifestoQuote: "KEINE VERGANGENHEIT. KEIN DANACH. NUR JETZT.",
     pillars: [
-      ["01", "300 KM/H", "Auf abgesperrter Strecke sind 300 km/h unser visuelles Bild für totale Aufmerksamkeit. Die Ränder verschwimmen, die Linie zählt und jeder Input hat Folgen. Nicht Leichtsinn. Präsenz.", "RENNSTRECKE / TUNNEL VISION"],
+      ["01", "300 KM/H", "Auf abgesperrter Strecke sind 300 km/h unser visuelles Bild für totale Aufmerksamkeit. Die Ränder verschwimmen, die Linie zählt und jeder Input hat Folgen. Nicht Leichtsinn. Präsenz.", "RENNSTRECKE / FOKUS"],
       ["02", "47°N", "47°N steht für unseren mitteleuropäischen Ursprung. FLOWSTATE RACING wurde in Ungarn geboren, zwischen alten Straßen, späten Garagenabenden und einer neuen Generation mit eigener Bildsprache.", "UNGARN / MITTELEUROPA"],
       ["03", "FOREVER YOUNG", "Forever young hat nichts mit Alter zu tun. Es heißt, nicht abzustumpfen. Bleib neugierig, erschaffe Dinge und sammle Momente, die dich daran erinnern, wann du dich wirklich lebendig gefühlt hast.", "HALTUNG / ERINNERUNG"],
     ],
@@ -176,40 +178,40 @@ const copy = {
   },
 } as const;
 
+const brief = {
+  EN: { more: "READ THE STORY", items: ["Complete presence. Every input matters. The circuit is our visual language; focus is the state we carry.", "Born in Hungary. Rooted in Central Europe. 47°N is where our story begins.", "For the riders we remember, and the people still riding beside us."], study: "REFLECTIVE STUDY", studyText: "A future hoodie concept: a visible grey cybersigil base with finer reflective lines nested inside. 47°N at the hood, a discreet cuff stitch. Normal light and direct-flash views; sample testing still to come." },
+  HU: { more: "A TELJES TÖRTÉNET", items: ["Teljes jelenlét. Minden mozdulat számít. A pálya a képi világunk, a fókusz az állapot, amit továbbviszünk.", "Magyarországon született. Közép-Európában gyökerezik. A történetünk 47°N-nél kezdődik.", "Azokért, akikre emlékezünk, és azokért, akik még mellettünk motoroznak."], study: "REFLECTIVE LÁTVÁNYTERV", studyText: "Egy későbbi pulcsi terve: látható szürke cybersigil alap, benne finomabb fényvisszaverő vonalakkal. 47°N a kapucnin, apró hímzés a mandzsettán. Normál fény és vaku; a gyártási minták tesztelése még hátravan." },
+  DE: { more: "DIE GANZE GESCHICHTE", items: ["Ganz im Moment. Jeder Impuls zählt. Die Rennstrecke prägt unsere Bildsprache, Fokus unsere Haltung.", "In Ungarn entstanden. In Mitteleuropa verwurzelt. Bei 47°N beginnt unsere Geschichte.", "Für die Menschen, an die wir denken, und die, die noch neben uns fahren."], study: "REFLEKTIERENDER ENTWURF", studyText: "Ein künftiges Hoodie-Konzept: eine sichtbare graue Cybersigil-Grafik mit feineren reflektierenden Linien im Inneren. 47°N an der Kapuze, dezente Stickerei am Bündchen. Normallicht und Direktblitz; Mustertests stehen noch aus." }
+};
+
 function BrandLockup({ compact = false }: { compact?: boolean }) {
   return <span className={compact ? "brand-lockup compact" : "brand-lockup"}><b>FLOWSTATE</b><em>RACING</em>{!compact && <small>47°N — EUROPEAN DIVISION</small>}</span>;
 }
 
 function ProductArtwork({ product }: { product: Product }) {
+  const { lang } = useLanguage(); const u = ui[lang];
   return <div className={`photo-visual ${product.visual}`}>
-    <img src={sitePath(product.image!)} loading="lazy" alt={`${product.name}: AI-generated design mockup, not a manufactured sample`}/>
-    <span className="view-360">DESIGN CONCEPT</span>
+    <img src={sitePath(product.image!)} loading="lazy" alt={`${product.name}: ${u.mockup}`}/>
+    <span className="view-360">{u.concept}</span>
   </div>;
 }
 
 export default function Home() {
-  const [lang, setLang] = useState<Language>("EN");
+  const { lang } = useLanguage();
+  const u = ui[lang];
+  const [notice, setNotice] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [menu, setMenu] = useState(false);
-  const [email, setEmail] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [joined, setJoined] = useState(false);
-  const [joining, setJoining] = useState(false);
-  const [joinError, setJoinError] = useState("");
   const [sizes, setSizes] = useState<Record<number, string>>({ 1: "M", 2: "M" });
   const [look, setLook] = useState(0);
   const [cartReady, setCartReady] = useState(false);
   const t = copy[lang];
-  const web3FormsKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-  const waitlistReady = launch.waitlistEnabled && Boolean(web3FormsKey);
 
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("flowstate-cart") ?? "null");
       if (saved?.expiresAt > Date.now()) setCart(sanitizeCart(saved.items));
       else localStorage.removeItem("flowstate-cart");
-      const language = JSON.parse(localStorage.getItem("flowstate-language") ?? "null");
-      if (language?.expiresAt > Date.now() && ["EN", "HU", "DE"].includes(language.value)) setLang(language.value as Language);
     } catch {}
     setCartReady(true);
   }, []);
@@ -220,16 +222,11 @@ export default function Home() {
     } catch {}
   }, [cart, cartReady]);
 
-  useEffect(() => {
-    document.documentElement.lang = lang === "EN" ? "en" : lang === "HU" ? "hu" : "de";
-    if (cartReady) try {
-      localStorage.setItem("flowstate-language", JSON.stringify({ value: lang, expiresAt: Date.now() + 30 * 86400000 }));
-    } catch {}
-  }, [lang, cartReady]);
 
   const itemCount = cart.reduce((n, item) => n + item.qty, 0);
   const total = useMemo(() => cart.reduce((sum, item) => sum + products.find((p) => p.id === item.id)!.huf * item.qty, 0), [cart]);
   const add = (id: number) => {
+    setNotice(u.added);
     const size = sizes[id] ?? "ONE SIZE";
     setCart((current) => {
       const index = current.findIndex((item) => item.id === id && item.size === size);
@@ -238,58 +235,23 @@ export default function Home() {
   };
   const changeQty = (index: number, by: number) => setCart((current) => current.map((item, i) => i === index ? { ...item, qty: Math.min(10, item.qty + by) } : item).filter((item) => item.qty > 0));
 
-  const submitEmail = async (event: FormEvent) => {
-    event.preventDefault();
-    setJoining(true);
-    setJoinError("");
-    try {
-      if (!web3FormsKey || !consent) throw new Error("signup unavailable");
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: web3FormsKey,
-          subject: `FLOWSTATE RACING — DROP 001 access request (${lang})`,
-          from_name: "FLOWSTATE RACING website",
-          email,
-          language: lang,
-          consent: "DROP 001 launch email consent accepted",
-          consent_version: launch.legalVersion,
-          submitted_at: new Date().toISOString(),
-          source: "FLOWSTATE RACING website",
-        }),
-      });
-      const result = await response.json() as { success?: boolean };
-      if (!response.ok || !result.success) throw new Error("signup failed");
-      setJoined(true);
-      setEmail("");
-      setConsent(false);
-    } catch {
-      setJoinError(t.joinError);
-    } finally {
-      setJoining(false);
-    }
-  };
-
-  return <main id="top">
+  return <main id="top"><a className="skip-link" href="#drop">{u.skip}</a><p className="sr-only" role="status">{notice}</p>
     <header className="nav-shell">
       <a href="#top" aria-label="Flowstate Racing home"><BrandLockup compact/></a>
-      <nav className={menu ? "nav-links open" : "nav-links"} aria-label="Main navigation">
+      <nav className={menu ? "nav-links open" : "nav-links"} aria-label={u.navigation}>
         <a href="#drop" onClick={() => setMenu(false)}>{t.nav[0]}</a>
         <a href="#manifesto" onClick={() => setMenu(false)}>{t.nav[1]}</a>
         <a href="#system" onClick={() => setMenu(false)}>{t.nav[2]}</a>
       </nav>
       <div className="nav-actions">
-        <div className="language-switch" aria-label={t.languageLabel}>
-          {(["EN", "HU", "DE"] as Language[]).map((language) => <button key={language} className={lang === language ? "active" : ""} onClick={() => setLang(language)} aria-pressed={lang === language}>{language}</button>)}
-        </div>
+        <LanguageSwitcher/>
         <Sheet>
-          <SheetTrigger asChild><button className="bag" aria-label="Open pre-order bag"><ShoppingBag size={19}/><span>{itemCount}</span></button></SheetTrigger>
-          <SheetContent className="cart-panel"><SheetHeader><SheetTitle className="cart-title">{t.cart}</SheetTitle></SheetHeader>
-            {cart.length === 0 ? <div className="empty-cart"><ShoppingBag/><p>{t.empty}</p><span>DROP 001 / ENTER THE FLOWSTATE</span></div> : <div className="cart-list">{cart.map((item, index) => { const p = products.find((x) => x.id === item.id)!; return <div className="cart-row" key={`${item.id}-${item.size}`}><div><small>{p.code} · {item.size}</small><strong>{p.name}</strong><span>{p.huf.toLocaleString("hu-HU")} FT</span></div><div className="qty"><button onClick={() => changeQty(index, -1)} aria-label="Decrease quantity"><Minus size={14}/></button>{item.qty}<button onClick={() => changeQty(index, 1)} aria-label="Increase quantity"><Plus size={14}/></button></div></div>})}<div className="cart-total"><span>{t.total}</span><strong>{total.toLocaleString("hu-HU")} FT</strong></div><SheetClose asChild><a className="primary full" href="#access">{t.checkout}</a></SheetClose><p className="cart-note">{t.noCharge}</p></div>}
+          <SheetTrigger asChild><button className="bag" aria-label={u.openBag}><ShoppingBag size={19}/><span>{itemCount}</span></button></SheetTrigger>
+          <SheetContent className="cart-panel" aria-describedby={undefined} showCloseButton={false}><SheetClose className="cart-close" aria-label={u.close}><X/></SheetClose><SheetHeader><SheetTitle className="cart-title">{t.cart}</SheetTitle></SheetHeader>
+            {cart.length === 0 ? <div className="empty-cart"><ShoppingBag/><p>{t.empty}</p><span>DROP 001 / ENTER THE FLOWSTATE</span></div> : <div className="cart-list">{cart.map((item, index) => { const p = products.find((x) => x.id === item.id)!; return <div className="cart-row" key={`${item.id}-${item.size}`}><div><small>{p.code} · {item.size === "ONE SIZE" ? u.oneSize : item.size}</small><strong>{p.name}</strong><span>{p.huf.toLocaleString("hu-HU")} FT</span></div><div className="qty"><button onClick={() => changeQty(index, -1)} aria-label={u.less}><Minus size={14}/></button>{item.qty}<button onClick={() => changeQty(index, 1)} aria-label={u.more}><Plus size={14}/></button></div></div>})}<div className="cart-total"><span>{t.total}</span><strong>{total.toLocaleString("hu-HU")} FT</strong></div><SheetClose asChild><a className="primary full" href="#access">{t.checkout}</a></SheetClose><p className="cart-note">{t.noCharge}</p></div>}
           </SheetContent>
         </Sheet>
-        <button className="menu-button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Toggle menu">{menu ? <X/> : <Menu/>}</button>
+        <button className="menu-button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label={u.menu}>{menu ? <X/> : <Menu/>}</button>
       </div>
     </header>
 
@@ -301,25 +263,24 @@ export default function Home() {
       <div className="ticker"><div>FLOWSTATE RACING — 47°N — FOREVER YOUNG — DROP 001 — ENTER THE FLOWSTATE — FLOWSTATE RACING — 47°N — FOREVER YOUNG — DROP 001 — ENTER THE FLOWSTATE —</div></div>
     </section>
 
-    <section className="drop-section" id="drop"><div className="section-head"><div><p className="eyebrow"><span/> {t.first}</p><h2>DROP 001<br/><i>ENTER THE FLOWSTATE</i></h2></div><p>{t.dropIntro}</p></div><div className="product-grid">{products.map((product) => <article className="product-card" key={product.id}><div className="product-code">/{product.code}</div><ProductArtwork product={product}/><div className="product-info"><div><h3>{product.name}</h3><span className="concept-label">{t.conceptLabel}</span><p>{product.detail}</p></div><div className="price"><b>{product.huf.toLocaleString("hu-HU")} FT</b><span>€{product.eur}</span></div></div><div className="product-actions">{product.sizes && <select aria-label={`Size for ${product.name}`} value={sizes[product.id]} onChange={(e) => setSizes({ ...sizes, [product.id]: e.target.value })}>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select>}<button onClick={() => add(product.id)}>{t.add} <Plus size={17}/></button></div></article>)}</div></section>
+    <section className="drop-section" id="drop"><div className="section-head"><div><p className="eyebrow"><span/> {t.first}</p><h2>DROP 001<br/><i>ENTER THE FLOWSTATE</i></h2></div><p>{t.dropIntro}</p></div><div className="product-grid">{products.map((product) => <article className="product-card" key={product.id}><div className="product-code">/{product.code}</div><ProductArtwork product={product}/><div className="product-info"><div><h3>{product.name}</h3><span className="concept-label">{t.conceptLabel}</span><p>{u.details[products.indexOf(product)]}</p></div><div className="price"><b>{product.huf.toLocaleString("hu-HU")} FT</b><span>€{product.eur}</span></div></div><div className="product-actions">{product.sizes && <select aria-label={`${u.size}: ${product.name}`} value={sizes[product.id]} onChange={(e) => setSizes({ ...sizes, [product.id]: e.target.value })}>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select>}<button onClick={() => add(product.id)}>{t.add} <Plus size={17}/></button></div></article>)}</div></section>
 
-    <section className="lookbook" aria-label="Flowstate campaign lookbook"><div className="lookbook-frame"><img src={sitePath(look === 0 ? "/flowstate-hoodie.webp" : "/flowstate-hero-v2.webp")} alt={look === 0 ? "Flowstate hoodie fit on a model" : "Flowstate Racing night campaign"}/><span>LOOK 0{look + 1} / 47°N</span></div><div className="lookbook-copy"><p className="eyebrow"><span/> {t.lookLabel}</p><h2>{t.lookTitle}</h2><p>{t.lookText}</p><div className="look-controls"><button onClick={() => setLook(look === 0 ? 1 : 0)} aria-label="Previous look"><ChevronLeft/></button><b>0{look + 1} / 02</b><button onClick={() => setLook(look === 0 ? 1 : 0)} aria-label="Next look"><ChevronRight/></button></div></div></section>
+    <section className="lookbook" aria-label="Flowstate campaign lookbook"><div className={look === 2 ? "lookbook-frame study-frame" : "lookbook-frame"}><img src={sitePath(look === 0 ? "/flowstate-hoodie.webp" : look === 1 ? "/flowstate-hero-v2.webp" : "/flowstate-reflective-study.webp")} alt={look === 2 ? brief[lang].studyText : u.mockup}/><span>LOOK 0{look + 1} / 47°N</span></div><div className="lookbook-copy"><p className="eyebrow"><span/> {look === 2 ? brief[lang].study : t.lookLabel}</p><h2>{look === 2 ? "AFTER DARK." : t.lookTitle}</h2><p>{look === 2 ? brief[lang].studyText : t.lookText}</p><button className="study-link" onClick={() => setLook(2)}>{brief[lang].study} ↗</button><div className="look-controls"><button onClick={() => setLook((look + 2) % 3)} aria-label={u.previous}><ChevronLeft/></button><b>0{look + 1} / 03</b><button onClick={() => setLook((look + 1) % 3)} aria-label={u.next}><ChevronRight/></button></div></div></section>
 
     <section className="manifesto manifesto-v2" id="manifesto">
       <div className="manifesto-grid-mark" aria-hidden="true"/>
       <div className="manifesto-topline"><span>{t.manifestoLabel}</span><small>{t.manifestoKicker}</small></div>
-      <div className="manifesto-lead"><div><span className="manifesto-index">47°N / 001</span><h2>{t.manifestoHeadline}</h2></div><p>{t.manifestoIntro}</p></div>
+      <div className="manifesto-lead"><div><span className="manifesto-index">47°N / 001</span><h2>{u.manifesto.title} <i>{u.manifesto.emphasis}</i></h2></div><p>{u.manifesto.intro}</p></div>
       <div className="manifesto-signal"><div className="speed-lockup"><span>TRACK SYMBOL</span><strong>300</strong><small>KM/H</small></div><blockquote>“{t.manifestoQuote}”</blockquote><div className="focus-lines" aria-hidden="true"><span/><span/><span/><span/></div></div>
-      <div className="manifesto-pillars">{t.pillars.map((pillar) => <article key={pillar[0]}><div className="pillar-head"><span>{pillar[0]}</span><small>{pillar[3]}</small></div><h3>{pillar[1]}</h3><p>{pillar[2]}</p></article>)}</div>
-      <div className="manifesto-footerline"><span>FLOWSTATE RACING</span><strong>47°N — EUROPEAN DIVISION</strong><span>FOREVER YOUNG</span></div>
+      <div className="manifesto-pillars">{t.pillars.map((pillar, i) => <article key={pillar[0]}><div className="pillar-head"><span>{pillar[0]}</span><small>{pillar[3]}</small></div><h3>{pillar[1]}</h3><p className="pillar-brief">{brief[lang].items[i]}</p><details className="pillar-details"><summary>{brief[lang].more}</summary><p>{[u.manifesto.focus, u.manifesto.origin, u.manifesto.memory][i]}</p></details></article>)}</div>
+      <p className="manifesto-note">{u.manifesto.note}</p><div className="manifesto-footerline"><span>FLOWSTATE RACING</span><strong>47°N — EUROPEAN DIVISION</strong><span>FOREVER YOUNG</span></div>
     </section>
 
     <section className="system" id="system"><div><p className="eyebrow"><span/> {t.systemLabel}</p><h2>{t.system}</h2></div><ol>{t.steps.map((step, index) => <li key={step[0]}><b>0{index + 1}</b><div><strong>{step[0]}</strong><p>{step[1]}</p></div></li>)}</ol></section>
 
-    <section className="access" id="access"><p className="eyebrow"><span/> {t.access}</p><h2>{t.accessTitle}</h2><p>{t.accessText}</p>{!waitlistReady ? <p className="launch-notice" role="status">{t.launchNotice}</p> : <form onSubmit={submitEmail}>{joined ? <div className="success"><Check size={18}/>{t.joined}</div> : <><label className="sr-only" htmlFor="email">Email address</label><div className="signup-row"><input id="email" type="email" required placeholder={t.email} value={email} onChange={(e) => setEmail(e.target.value)}/><button className="primary" disabled={joining || !consent}>{joining ? "..." : t.join}</button></div><label className="consent-row"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required/><span>{t.consent}</span></label></>}</form>}{joinError && <p className="form-error" role="alert">{joinError}</p>}<small>{t.privacy}</small></section>
+    <section className="access" id="access"><p className="eyebrow"><span/> {t.access}</p><h2>{t.accessTitle}</h2><p>{t.accessText}</p><SignupForm labels={{ email: t.email, join: t.join }}/><small>{t.privacy}</small></section>
 
-    <section className="sticker-section"><div><p className="eyebrow">{t.stickerEyebrow}</p><h2>LEAVE A<br/><i>SIGNAL.</i></h2><p>{t.stickerText}</p><a className="text-link" href={sitePath("/print/flowstate-qr-sticker.svg")}>QR STICKER / PRINT PROOF</a></div><img src={sitePath("/flowstate-accessories.webp")} loading="lazy" alt="Flowstate jet tag and promotional sticker design concepts"/></section>
 
-    <footer><BrandLockup/><div><span>INSTAGRAM / @FLOWSTATE.RACING</span><span>TIKTOK / @FLOWSTATE.RACING</span><a href={sitePath("/terms")}>TERMS</a><a href={sitePath("/privacy")}>PRIVACY</a><a href={sitePath("/cookies")}>COOKIES</a><a href={sitePath("/shipping")}>SHIPPING & RETURNS</a><a href={sitePath("/imprint")}>IMPRINT</a></div><p>© 2026 FLOWSTATE RACING.<br/>DESIGNED IN HUNGARY / 47°N.<br/>RIDE RESPONSIBLY. AI CAMPAIGN CONCEPT.<br/>NO AFFILIATION WITH EQUIPMENT BRANDS.</p></footer>
+    <footer><BrandLockup/><div><span>INSTAGRAM / @FLOWSTATE.RACING</span><span>TIKTOK / @FLOWSTATE.RACING</span>{["terms","privacy","cookies","shipping","imprint"].map((path,i)=><a key={path} href={sitePath(`/${path}/`)}>{u.footer[i]}</a>)}</div><p>© 2026 FLOWSTATE RACING.<br/>{u.origin}<br/>{u.disclaimer}<br/>{u.affiliation}</p></footer>
   </main>;
 }
