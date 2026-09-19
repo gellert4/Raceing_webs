@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "flowstate-store",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-19",
+  "assets": { "directory": "../../out", "binding": "ASSETS", "run_worker_first": true, "not_found_handling": "404-page" },
+  "observability": { "enabled": false },
+  "triggers": { "crons": ["* * * * *"] },
+  "d1_databases": [{ "binding": "DB", "database_name": "flowstate-commerce", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../commerce/migrations" }],
+  "vars": {
+    "CHECKOUT_ENABLED": "false", "WITHDRAWAL_ENABLED": "false", "STRIPE_MODE": "test",
+    "REGISTRATION_ENABLED": "false", "TRANSACTIONAL_MAIL_ENABLED": "false", "MAIL_FROM": "",
+    "BREVO_LIST_EN": "0", "BREVO_LIST_HU": "0", "BREVO_LIST_DE": "0",
+    "BREVO_TEMPLATE_EN": "0", "BREVO_TEMPLATE_HU": "0", "BREVO_TEMPLATE_DE": "0"
+  },
+  "ratelimits": [
+    { "name": "API_LIMITER", "namespace_id": "47003", "simple": { "limit": 10, "period": 60 } },
+    { "name": "IP_LIMITER", "namespace_id": "47001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "EMAIL_LIMITER", "namespace_id": "47002", "simple": { "limit": 1, "period": 60 } }
+  ]
+}

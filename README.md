@@ -29,12 +29,15 @@ node --experimental-strip-types --test tests/*.test.ts
 One hoodie, one tee, one jet-tag keychain. Stickers are supplementary artwork, not an extra launch SKU. All renders are AI concept visuals. Textile weights, composition, sizes and final prices need production verification. Do not claim brand sponsorship.
 
 ## Launch status
-This is not a finished transactional shop. Payment, admin uploads, REP commissions and real 360° photography are not implemented. A standalone double-opt-in email integration is implemented and tested with a mocked provider, but requires Cloudflare/Brevo setup, verified sender, completed privacy information and real delivery/unsubscribe testing. Registration is intentionally closed until legal/controller details and consent lifecycle exist. Read the launch checklist before accepting registrations or orders.
+This is not a finished transactional shop. A Stripe Checkout backend, signed webhooks, D1 order/task records, transactional email queue and online withdrawal flow are implemented but not connected to live provider accounts. Admin uploads, REP commissions and real 360° photography are not implemented. A standalone double-opt-in email integration is implemented and tested with a mocked provider, but requires Cloudflare/Brevo setup, verified sender, completed privacy information and real delivery/unsubscribe testing. Registration is intentionally closed until legal/controller details and consent lifecycle exist. Read the launch checklist before accepting registrations or orders.
+
+## Production activation
+Read [docs/INDULAS-HU.md](docs/INDULAS-HU.md). Fill public facts in `config/business.ts`, review `lib/policies.ts`, configure providers, test the full lifecycle and run `scripts/check-launch.ts`. Checkout, mail and withdrawal are disabled by default. Invoice issuance and shipment remain operator tasks.
 
 ## Deployment
 The public preview is at https://gellert4.github.io/Raceing_webs/. The GitHub Pages workflow builds and deploys pushes to `main`; it also supports manual runs. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-The older Sites/Worker adapters remain in the repository but are not the public Pages deployment. Never commit credentials, database exports or customer records.
+The production candidate is `services/site/worker.ts` with static assets and a separate D1 commerce database. GitHub Pages terms prohibit hosting production commerce there; keep it as a closed preview and move the store to Cloudflare. The older Sites/Vinext adapters remain separate. Never commit credentials, database exports or customer records.
 
 ## Email setup
 See [docs/EMAIL-SETUP.md](docs/EMAIL-SETUP.md). The frontend contains no provider API key. Signup stays disabled by default; configuring the provider and completing the launch gates is required before enabling it.

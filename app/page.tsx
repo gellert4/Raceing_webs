@@ -7,6 +7,10 @@ import { sanitizeCart, type CartItem } from "@/lib/cart";
 import { sitePath } from "@/lib/paths";
 import { ui } from "@/lib/translations";
 import { useLanguage, LanguageSwitcher } from "@/components/language";
+import { catalog } from "@/services/commerce/catalog";
+import { business } from "@/config/business";
+import { Checkout } from "@/components/checkout";
+import { launch } from "@/lib/store-config";
 import { SignupForm } from "@/components/signup-form";
 
 
@@ -23,9 +27,9 @@ type Product = {
 };
 
 const products: Product[] = [
-  { id: 1, code: "FSR-001", name: "STATE 01 HEAVY TEE", detail: "OVERSIZED · DESIGN CONCEPT", huf: 16990, eur: 43, sizes: ["S", "M", "L", "XL", "XXL"], image: "/flowstate-tee-v2.webp", visual: "tee" },
-  { id: 2, code: "FSR-002", name: "47°N DIVISION HOODIE", detail: "BOXY FIT · CYBERSIGIL BACK PRINT CONCEPT", huf: 32990, eur: 84, sizes: ["S", "M", "L", "XL", "XXL"], image: "/flowstate-hoodie.webp", visual: "hoodie" },
-  { id: 4, code: "FSR-004", name: "EUROPEAN DIVISION JET TAG", detail: "JET TAG KEYCHAIN · DESIGN CONCEPT", huf: 4490, eur: 12, image: "/flowstate-accessories.webp", visual: "tag" },
+  { id: 1, code: "FSR-001", name: "STATE 01 HEAVY TEE", detail: "OVERSIZED · DESIGN CONCEPT", huf: catalog[1].huf, eur: 43, sizes: ["S", "M", "L", "XL", "XXL"], image: "/flowstate-tee-v2.webp", visual: "tee" },
+  { id: 2, code: "FSR-002", name: "47°N DIVISION HOODIE", detail: "BOXY FIT · CYBERSIGIL BACK PRINT CONCEPT", huf: catalog[2].huf, eur: 84, sizes: ["S", "M", "L", "XL", "XXL"], image: "/flowstate-hoodie.webp", visual: "hoodie" },
+  { id: 4, code: "FSR-004", name: "EUROPEAN DIVISION JET TAG", detail: "JET TAG KEYCHAIN · DESIGN CONCEPT", huf: catalog[4].huf, eur: 12, image: "/flowstate-accessories.webp", visual: "tag" },
 ];
 
 const copy = {
@@ -205,7 +209,12 @@ export default function Home() {
   const [sizes, setSizes] = useState<Record<number, string>>({ 1: "M", 2: "M" });
   const [look, setLook] = useState(0);
   const [cartReady, setCartReady] = useState(false);
-  const t = copy[lang];
+  const live = {
+    EN: {cart:"YOUR BAG", conceptLabel:"PREORDER",dropIntro:"One hoodie. One tee. One jet tag. Review the confirmed product details and delivery dates before ordering."},
+    HU: {cart:"KOSARAD",conceptLabel:"ELŐRENDELÉS",dropIntro:"Egy pulcsi. Egy póló. Egy jet tag. Rendelés előtt nézd át a termékadatokat és a vállalt kézbesítést."},
+    DE: {cart:"DEIN WARENKORB",conceptLabel:"VORBESTELLUNG",dropIntro:"Ein Hoodie. Ein T-Shirt. Ein Jet Tag. Prüfe vor der Bestellung die Produktdetails und Liefertermine."}
+  };
+  const t = {...copy[lang], ...(launch.checkoutEnabled ? live[lang] : {})};
 
   useEffect(() => {
     try {
@@ -218,7 +227,8 @@ export default function Home() {
 
   useEffect(() => {
     if (cartReady) try {
-      localStorage.setItem("flowstate-cart", JSON.stringify({ items: cart, expiresAt: Date.now() + 30 * 86400000 }));
+      if (cart.length) localStorage.setItem("flowstate-cart", JSON.stringify({ items: cart, expiresAt: Date.now() + 30 * 86400000 }));
+      else localStorage.removeItem("flowstate-cart");
     } catch {}
   }, [cart, cartReady]);
 
@@ -248,7 +258,7 @@ export default function Home() {
         <Sheet>
           <SheetTrigger asChild><button className="bag" aria-label={u.openBag}><ShoppingBag size={19}/><span>{itemCount}</span></button></SheetTrigger>
           <SheetContent className="cart-panel" aria-describedby={undefined} showCloseButton={false}><SheetClose className="cart-close" aria-label={u.close}><X/></SheetClose><SheetHeader><SheetTitle className="cart-title">{t.cart}</SheetTitle></SheetHeader>
-            {cart.length === 0 ? <div className="empty-cart"><ShoppingBag/><p>{t.empty}</p><span>DROP 001 / ENTER THE FLOWSTATE</span></div> : <div className="cart-list">{cart.map((item, index) => { const p = products.find((x) => x.id === item.id)!; return <div className="cart-row" key={`${item.id}-${item.size}`}><div><small>{p.code} · {item.size === "ONE SIZE" ? u.oneSize : item.size}</small><strong>{p.name}</strong><span>{p.huf.toLocaleString("hu-HU")} FT</span></div><div className="qty"><button onClick={() => changeQty(index, -1)} aria-label={u.less}><Minus size={14}/></button>{item.qty}<button onClick={() => changeQty(index, 1)} aria-label={u.more}><Plus size={14}/></button></div></div>})}<div className="cart-total"><span>{t.total}</span><strong>{total.toLocaleString("hu-HU")} FT</strong></div><SheetClose asChild><a className="primary full" href="#access">{t.checkout}</a></SheetClose><p className="cart-note">{t.noCharge}</p></div>}
+            {cart.length === 0 ? <div className="empty-cart"><ShoppingBag/><p>{t.empty}</p><span>DROP 001 / ENTER THE FLOWSTATE</span></div> : <div className="cart-list">{cart.map((item, index) => { const p = products.find((x) => x.id === item.id)!; return <div className="cart-row" key={`${item.id}-${item.size}`}><div><small>{p.code} · {item.size === "ONE SIZE" ? u.oneSize : item.size}</small><strong>{p.name}</strong><span>{p.huf.toLocaleString("hu-HU")} FT</span></div><div className="qty"><button onClick={() => changeQty(index, -1)} aria-label={u.less}><Minus size={14}/></button>{item.qty}<button onClick={() => changeQty(index, 1)} aria-label={u.more}><Plus size={14}/></button></div></div>})}<div className="cart-total"><span>{t.total}</span><strong>{total.toLocaleString("hu-HU")} FT</strong></div>{launch.checkoutEnabled ? <Checkout items={cart} total={total}/> : <SheetClose asChild><a className="primary full" href="#access">{t.checkout}</a></SheetClose>}{!launch.checkoutEnabled && <p className="cart-note">{t.noCharge}</p>}</div>}
           </SheetContent>
         </Sheet>
         <button className="menu-button" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label={u.menu}>{menu ? <X/> : <Menu/>}</button>
@@ -263,7 +273,7 @@ export default function Home() {
       <div className="ticker"><div>FLOWSTATE RACING — 47°N — FOREVER YOUNG — DROP 001 — ENTER THE FLOWSTATE — FLOWSTATE RACING — 47°N — FOREVER YOUNG — DROP 001 — ENTER THE FLOWSTATE —</div></div>
     </section>
 
-    <section className="drop-section" id="drop"><div className="section-head"><div><p className="eyebrow"><span/> {t.first}</p><h2>DROP 001<br/><i>ENTER THE FLOWSTATE</i></h2></div><p>{t.dropIntro}</p></div><div className="product-grid">{products.map((product) => <article className="product-card" key={product.id}><div className="product-code">/{product.code}</div><ProductArtwork product={product}/><div className="product-info"><div><h3>{product.name}</h3><span className="concept-label">{t.conceptLabel}</span><p>{u.details[products.indexOf(product)]}</p></div><div className="price"><b>{product.huf.toLocaleString("hu-HU")} FT</b><span>€{product.eur}</span></div></div><div className="product-actions">{product.sizes && <select aria-label={`${u.size}: ${product.name}`} value={sizes[product.id]} onChange={(e) => setSizes({ ...sizes, [product.id]: e.target.value })}>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select>}<button onClick={() => add(product.id)}>{t.add} <Plus size={17}/></button></div></article>)}</div></section>
+    <section className="drop-section" id="drop"><div className="section-head"><div><p className="eyebrow"><span/> {t.first}</p><h2>DROP 001<br/><i>ENTER THE FLOWSTATE</i></h2></div><p>{t.dropIntro}</p></div><div className="product-grid">{products.map((product) => <article className="product-card" key={product.id}><div className="product-code">/{product.code}</div><ProductArtwork product={product}/><div className="product-info"><div><h3>{product.name}</h3><span className="concept-label">{t.conceptLabel}</span><p>{u.details[products.indexOf(product)]}</p></div><div className="price"><b>{product.huf.toLocaleString("hu-HU")} FT</b><span>€{product.eur}</span></div></div>{business.productInformation[product.id as 1|2|4][lang] && <details className="product-facts"><summary>{lang === "HU" ? "Termékadatok és méretek" : lang === "DE" ? "Produktdetails und Maße" : "Product details and measurements"}</summary><p>{business.productInformation[product.id as 1|2|4][lang]}</p><p>{business.manufacturerName} / {business.manufacturerAddress} / {business.manufacturerEmail}</p></details>}<div className="product-actions">{product.sizes && <select aria-label={`${u.size}: ${product.name}`} value={sizes[product.id]} onChange={(e) => setSizes({ ...sizes, [product.id]: e.target.value })}>{product.sizes.map((size) => <option key={size}>{size}</option>)}</select>}<button onClick={() => add(product.id)}>{t.add} <Plus size={17}/></button></div></article>)}</div></section>
 
     <section className="lookbook" aria-label="Flowstate campaign lookbook"><div className={look === 2 ? "lookbook-frame study-frame" : "lookbook-frame"}><img src={sitePath(look === 0 ? "/flowstate-hoodie.webp" : look === 1 ? "/flowstate-hero-v2.webp" : "/flowstate-reflective-study.webp")} alt={look === 2 ? brief[lang].studyText : u.mockup}/><span>LOOK 0{look + 1} / 47°N</span></div><div className="lookbook-copy"><p className="eyebrow"><span/> {look === 2 ? brief[lang].study : t.lookLabel}</p><h2>{look === 2 ? "AFTER DARK." : t.lookTitle}</h2><p>{look === 2 ? brief[lang].studyText : t.lookText}</p><button className="study-link" onClick={() => setLook(2)}>{brief[lang].study} ↗</button><div className="look-controls"><button onClick={() => setLook((look + 2) % 3)} aria-label={u.previous}><ChevronLeft/></button><b>0{look + 1} / 03</b><button onClick={() => setLook((look + 1) % 3)} aria-label={u.next}><ChevronRight/></button></div></div></section>
 
@@ -281,6 +291,6 @@ export default function Home() {
     <section className="access" id="access"><p className="eyebrow"><span/> {t.access}</p><h2>{t.accessTitle}</h2><p>{t.accessText}</p><SignupForm labels={{ email: t.email, join: t.join }}/><small>{t.privacy}</small></section>
 
 
-    <footer><BrandLockup/><div><span>INSTAGRAM / @FLOWSTATE.RACING</span><span>TIKTOK / @FLOWSTATE.RACING</span>{["terms","privacy","cookies","shipping","imprint"].map((path,i)=><a key={path} href={sitePath(`/${path}/`)}>{u.footer[i]}</a>)}</div><p>© 2026 FLOWSTATE RACING.<br/>{u.origin}<br/>{u.disclaimer}<br/>{u.affiliation}</p></footer>
+    <footer><BrandLockup/><div><span>INSTAGRAM / @FLOWSTATE.RACING</span><span>TIKTOK / @FLOWSTATE.RACING</span>{["terms","privacy","cookies","shipping","imprint"].map((path,i)=><a key={path} href={sitePath(`/${path}/`)}>{u.footer[i]}</a>)}<a href={sitePath("/withdrawal/")}>{lang === "HU" ? "ELÁLLÁS" : lang === "DE" ? "WIDERRUF" : "WITHDRAWAL"}</a></div><p>© 2026 FLOWSTATE RACING.<br/>{u.origin}<br/>{u.disclaimer}<br/>{u.affiliation}</p></footer>
   </main>;
 }

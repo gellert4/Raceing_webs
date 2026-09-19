@@ -1,0 +1,33 @@
+name: Deploy Cloudflare production candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: node --experimental-strip-types --test tests/*.test.ts
+      - run: pnpm exec next build
+        env:
+          STATIC_EXPORT: '1'
+          NEXT_PUBLIC_BASE_PATH: ''
+          NEXT_PUBLIC_CHECKOUT_ENABLED: ${{ vars.CHECKOUT_ENABLED }}
+          NEXT_PUBLIC_WAITLIST_URL: /api/subscribe
+          NEXT_PUBLIC_WAITLIST_ENABLED: ${{ vars.WAITLIST_ENABLED }}
+          NEXT_PUBLIC_WITHDRAWAL_ENABLED: ${{ vars.WITHDRAWAL_ENABLED }}
+      - run: node scripts/build-csp.mjs
+      - run: pnpm exec wrangler deploy --config services/site/wrangler.jsonc
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

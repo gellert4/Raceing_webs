@@ -17,7 +17,7 @@ export const legalDe: Record<string, { title: string; sections: [string, string]
   COOKIES: { title: "COOKIES", sections: [
     ["Lokaler Browserspeicher", "flowstate-cart speichert deinen Warenkorbentwurf, flowstate-language deine Sprache. Die Einträge verfallen nach 30 Tagen ohne Aktualisierung; der Ablauf wird beim nächsten Besuch geprüft. Sie werden nicht als Bestellung übertragen."],
     ["Kein Tracking", "Es sind keine Werbepixel, Analysedienste oder Social-Media-Einbettungen installiert. Optionale Tracker dürfen künftig erst nach einer separaten, widerrufbaren Einwilligung geladen werden."],
-    ["Hosting", "Die öffentliche Vorschau läuft auf GitHub Pages; eine frühere private Vorschau nutzte ChatGPT Sites. Infrastruktur- und Anmeldecookies dieser Anbieter liegen außerhalb der lokalen Speichersteuerung und sind für die endgültige Domain gesondert zu prüfen."]
+    ["Hosting", "Die öffentliche Vorschau läuft auf GitHub Pages; eine frühere private Vorschau nutzte ChatGPT Sites. Für den produktiven Shop ist Cloudflare vorgesehen. Stripe Checkout wird erst nach deiner Entscheidung als separate Zahlungsseite geöffnet. Der Shop lädt keine Stripe-, Werbe- oder Social-Media-Skripte. Die endgültige Domain ist vor neuen Integrationen erneut zu prüfen."]
   ] },
   DELIVERY: { title: "VERSAND", sections: [
     ["Lieferung", "Geplante Liefergebiete sind Ungarn und die EU. Versanddienstleister, Versandkosten, Umsatzsteuerbehandlung sowie Produktions- und Lieferzeiten stehen noch nicht fest. Käufe sind erst möglich, wenn diese Angaben vor der Zahlung angezeigt werden."],

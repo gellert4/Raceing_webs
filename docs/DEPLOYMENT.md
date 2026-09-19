@@ -17,3 +17,6 @@ The output is `out/`. The normal `pnpm build` retains the older Vinext Worker bu
 
 ## QR artwork
 The saved QR artwork remains a production proof; it is no longer a storefront section. Scan a physical test print before production. Regenerate the code if its destination changes; prefer a domain you own before a large print run.
+
+## Commercial hosting
+GitHub Pages is not permitted as the production e-commerce host. Use the separate manual Cloudflare production workflow and docs/INDULAS-HU.md. The Pages workflow forces checkout, withdrawal and signup off.

@@ -1,3 +1,8 @@
+# Production note (2026-09-19)
+For the integrated production site use `services/site/wrangler.jsonc` and `docs/INDULAS-HU.md`. Its same-origin endpoint is `/api/subscribe`; it derives origin, site URL and notice version from `config/business.ts`. Worker secrets and Brevo list/template values belong in that production service. The production build must use `NEXT_PUBLIC_WAITLIST_URL=/api/subscribe`. The older standalone instructions below are retained for reference; do not deploy both email backends by accident. The Pages workflow now always disables signup.
+
+The production Worker also sends order confirmations and withdrawal receipts through a separate durable transactional outbox. These are not marketing subscriptions. Configure `MAIL_FROM` and `TRANSACTIONAL_MAIL_ENABLED` separately, monitor errors/bounces, and test actual delivery. Queue acceptance is not proof of email delivery.
+
 # FLOWSTATE email setup
 
 Implemented: EN/HU/DE signup UI, explicit unchecked consent, bounded request bodies, origin checks, honeypot, per-IP and per-email throttling, Brevo double opt-in, separate language lists/templates, generic pending response and fail-closed errors. The static GitHub Pages site calls a separate Worker. No API secret is bundled into public JavaScript.
